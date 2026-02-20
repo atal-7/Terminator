@@ -23,40 +23,36 @@ func main() {
 		if input == 0 {
 			fmt.Println("terminating sdc main, dc and stryker api")
 			kill_sdc_apps()
-			return
+		} else {
+			fmt.Println("Please enter the name of the process")
+			app_name_raw, read_err := reader.ReadString('\n')
+			if read_err != nil {
+				//log
+				fmt.Println("Error when reading")
+				return
+			}
+
+			app_name := strings.TrimSpace(app_name_raw)
+			overall_result, err := kill_process_by_name(app_name) // revist
+			if err != nil {
+				fmt.Println("Error when killing process")
+				return
+			}
+			compute_result(overall_result, app_name)
 		}
 
-		fmt.Println("Please enter the name of the process")
-		app_name_raw, read_err := reader.ReadString('\n')
-		if read_err != nil {
-			//log
-			fmt.Println("Error when reading")
-			return
-		}
-		app_name := strings.TrimSpace(app_name_raw)
-
-		overall_result, err := kill_process_by_name(app_name) // revist
-		if err != nil {
-			fmt.Println("Error when killing process")
-			return
-		}
-		compute_result(overall_result, app_name)
-
+		// try again
+		fmt.Println("\nEnter y to continue. Anything else to exit")
 		input_raw, read_err := reader.ReadString('\n')
 		if read_err != nil {
 			//log
 			fmt.Println("Error when reading")
 			return
 		}
-
-		fmt.Println("Enter y to continue. Anything else to exit")
-
 		if try_again_str := strings.TrimSpace(input_raw); !strings.EqualFold(try_again_str, "y") {
 			return
 		}
-
 	}
-
 }
 
 func compute_result(overall_result []bool, app_name string) {
@@ -113,7 +109,8 @@ func get_selection(reader *bufio.Reader) int {
 func kill_sdc_apps() error {
 	const sdc_main string = "sdcmain.exe"
 	const device_control string = "sdcdevicecontrolapplication.exe"
-	const stryker_api string = "sdcstrykerapiserver.exe"
+	const stryker_api string = "strykerapiserver.exe"
+	const sdc_stryker_api string = "sdcstrykerapiserver.exe"
 
 	overall_result, err := kill_process_by_name(device_control)
 	if err != nil {
